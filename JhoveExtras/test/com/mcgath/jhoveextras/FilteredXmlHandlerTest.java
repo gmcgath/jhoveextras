@@ -104,6 +104,7 @@ import static org.junit.Assert.*;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 
 import org.junit.Test;
 
@@ -117,19 +118,22 @@ public class FilteredXmlHandlerTest {
         ExampleFrame tf = new ExampleFrame (System.getProperty ("user.home") +
                 "/jhove/conf/jhove.conf");
         FilteredXmlHandler handler = new FilteredXmlHandler();
-        handler.addSignificantProperty("Title");
-        handler.addSignificantProperty("Property");
+        handler.addSignificantProperty("Producer");
+        handler.addSignificantProperty("CreationDate");
+        //handler.addSignificantProperty("PDFMetadata");   // ** SANITY CHECK 
         
         StringWriter wrtr = new StringWriter ();
         PrintWriter pwrtr = new PrintWriter (wrtr);
         handler.setWriter(pwrtr);
         
-        PdfModule module = new PdfModule ();
         try {
+            PdfModule module = new PdfModule ();
+            module.init("");
+            module.setDefaultParams(new ArrayList<String>());
             tf.processFile("testfiles/test1.pdf", module, handler);
             String output = wrtr.getBuffer().toString();
-            assertTrue (output.indexOf ("\"Title\"") > 0);
-            assertTrue (output.indexOf ("\"Author\"") > 0);
+            assertTrue (output.indexOf ("<name>Producer") > 0);
+            assertTrue (output.indexOf ("<name>CreationDate") > 0);
         }
         catch (Exception e) {
             e.printStackTrace();

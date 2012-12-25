@@ -101,6 +101,7 @@ permission of its copyright owner.
 package com.mcgath.jhoveextras;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -142,16 +143,15 @@ public class FilteredXmlHandler extends XmlHandler {
      * representation information. In this case, all properties
      * whose name doesn't mark them as "significant" and don't have a
      * descendant that's "significant" are pruned from the property tree.
-     * However, the top-level properties are always retained.
+     * 
      * @param info Object representation information
      */
     @Override
     public void analyze (RepInfo info) {
         Map<String, Property> props = info.getProperty();
-        //Collection<Property> propVals = props.values();
         for (String key : props.keySet()) {
             Property p = props.get(key);
-            if (!containsSignificantData(p)) {
+            if (!testForRetention(p)) {
                 props.remove(key);
             }
         }
@@ -160,7 +160,7 @@ public class FilteredXmlHandler extends XmlHandler {
     /* Return true if this property contains either has a name
      * which is one of the significant property names, or has
      * a descendant that does. */
-    private boolean containsSignificantData (Property p ) {
+    private boolean testForRetention (Property p ) {
         if (significantPropNames.contains( p.getName())) {  
             return true;      
         }
@@ -170,30 +170,55 @@ public class FilteredXmlHandler extends XmlHandler {
         if (arity.equals (PropertyArity.MAP) && pType.equals (PropertyType.PROPERTY)) {
             @SuppressWarnings("rawtypes")
             Map mapVal = (Map) val;
-            for (Object keyObj : mapVal.keySet()) {
+            boolean retain = false;
+            // I'm not sure it's necessary to do it this way, but it seems safer,
+            // since we're removing stuff inside the loop.
+            Object[] keys = mapVal.keySet().toArray();
+            for (int i = 0; i < keys.length; i++) {
+                Object keyObj = keys[i];
                 Property subVal = (Property) mapVal.get(keyObj);
-                if (containsSignificantData (subVal)) {
-                    return true;
+                if (testForRetention (subVal)) {
+                    retain = true;
+                }
+                else {
+                    mapVal.remove(keyObj);
                 }
             }
+            return retain;
         }
         else if (arity.equals (PropertyArity.SET) && pType.equals (PropertyType.PROPERTY)) {
             @SuppressWarnings("rawtypes")
             Set setVal = (Set) val;
-            for (Object subObj : setVal) {
-                if (containsSignificantData((Property) subObj)) {
-                    return true;
+            boolean retain = false;
+            // Same thing here -- can we safely iterate through a set
+            // while removing things from it?
+            Object[] objects = setVal.toArray();
+            for (int i = 0; i < objects.length; i++) {
+                Object subObj = objects[i];
+                if (testForRetention((Property) subObj)) {
+                    retain = true;
+                }
+                else {
+                    setVal.remove(subObj);
                 }
             }
+            return retain;
         }
         else if (arity.equals (PropertyArity.LIST) && pType.equals (PropertyType.PROPERTY)) {
             @SuppressWarnings("rawtypes")
             List listVal = (List) val;
-            for (Object subObj : listVal) {
-                if (containsSignificantData((Property) subObj)) {
-                    return true;
+            boolean retain = false;
+            Object[] objects = listVal.toArray();
+            for (int i = 0; i < objects.length; i++) {
+                Object subObj = objects[i];
+                if (testForRetention((Property) subObj)) {
+                    retain = true;
+                }
+                else {
+                    listVal.remove (subObj); // this isn't safe, is it?
                 }
             }
+            return retain;
         }
         return false;
     }

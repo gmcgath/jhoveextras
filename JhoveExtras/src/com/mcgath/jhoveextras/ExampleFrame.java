@@ -162,10 +162,13 @@ public class ExampleFrame {
             e.printStackTrace();
         }
     }
-    
+
+    /** Process the file. The module has to be iniitalized, and the handler has
+     *  to have its Writer set. */
     public void processFile (String filePath, 
             Module module,
             OutputHandler handler) throws Exception {
+        handler.setBase (jb);
         jb.process (app, module,  handler,  filePath);
     }
 }
