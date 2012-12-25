@@ -97,104 +97,75 @@ permission of its copyright owner.
  http://www.opensource.org/licenses/academic.php
  
 */
-
 package com.mcgath.jhoveextras;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+//import java.util.ArrayList;
+//import java.util.List;
 
-import edu.harvard.hul.ois.jhove.Property;
-import edu.harvard.hul.ois.jhove.PropertyArity;
-import edu.harvard.hul.ois.jhove.PropertyType;
-import edu.harvard.hul.ois.jhove.RepInfo;
-import edu.harvard.hul.ois.jhove.handler.XmlHandler;
+import edu.harvard.hul.ois.jhove.App;
+import edu.harvard.hul.ois.jhove.JhoveBase;
+import edu.harvard.hul.ois.jhove.Module;
+import edu.harvard.hul.ois.jhove.OutputHandler;
 
-public class FilteredXmlHandler extends XmlHandler {
+/** This is a class which provides a JHOVE test framework. */
+public class ExampleFrame {
 
-    private final static String NAME = "Filtered XML Handler";
-    private final static String RIGHTS = "Copyright 2012 Gary McGath";
+    /** Application name. */
+    private static final String NAME = "JhoveTestFrame";
+
+    /** Application build date, YYYY, MM, DD. */
+    private static int [] DATE = { 2012, 12, 24};
+
+    /** Application release number. */
+    private static String RELEASE = "1.0";
+
+    /** Application invocation syntax. */
+    private static final String USAGE = "For use with JHOVE Tips for Developers " +
+        "by Gary McGath, soon to be available on http://www.smashwords.com";
+
+    /** Copyright information. */
+    private static final String RIGHTS =
+    "Copyright 2012 by Gary McGath. Released as open source under ... ";
+        
+    private String logLevel     = "SEVERE";
     
-    private Set<String> significantPropNames;
-//    private final static String[] significantPropArray = {
-//        "foo", "bar" };
+    private JhoveBase jb;
+    private App app;
+
+    public ExampleFrame (String configPath) {
+        /* Make sure we have a satisfactory version of Java. */
+        String version = System.getProperty ("java.vm.version");
+        if (version.compareTo ("1.5.0") < 0) {
+            System.out.println ("Java 1.5 or higher is required");
+            return;
+        }
+        try {
+            
+            /**********************************************************
+             * Initialize the application state object.
+             **********************************************************/
     
-    /** Constructor */
-    public FilteredXmlHandler () {
-        super ();
-        _name = NAME;
-        _rights = RIGHTS;
-        significantPropNames = new HashSet<String>();
-//        for (String s : significantPropArray) {
-//            significantPropNames.add (s);
-//        }
+            app = new App (NAME, RELEASE, DATE, USAGE, RIGHTS);
+            jb = new JhoveBase ();
+            jb.setLogLevel (logLevel);
+            jb.init (configPath, null);
+
+//            List<String> list   = new ArrayList<String> ();
+            jb.setEncoding ("UTF-8");
+            //jb.setTempDirectory (tempDir);
+            jb.setBufferSize (131072);
+            jb.setChecksumFlag (false);
+            jb.setShowRawFlag (false);
+            jb.setSignatureFlag (false);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     
-    /** Add the name of a property to be retained */
-    public void addSignificantProperty (String p) {
-        significantPropNames.add (p);
-    }
-    
-    /**
-     * Callback allowing post-parse, pre-show analysis of object
-     * representation information. In this case, all properties
-     * whose name doesn't mark them as "significant" and don't have a
-     * descendant that's "significant" are pruned from the property tree.
-     * However, the top-level properties are always retained.
-     * @param info Object representation information
-     */
-    @Override
-    public void analyze (RepInfo info) {
-        Map<String, Property> props = info.getProperty();
-        //Collection<Property> propVals = props.values();
-        for (String key : props.keySet()) {
-            Property p = props.get(key);
-            if (!containsSignificantData(p)) {
-                props.remove(key);
-            }
-        }
-    }
-    
-    /* Return true if this property contains either has a name
-     * which is one of the significant property names, or has
-     * a descendant that does. */
-    private boolean containsSignificantData (Property p ) {
-        if (significantPropNames.contains( p.getName())) {  
-            return true;      
-        }
-        Object val = p.getValue();
-        PropertyArity arity = p.getArity();
-        PropertyType pType = p.getType();
-        if (arity.equals (PropertyArity.MAP) && pType.equals (PropertyType.PROPERTY)) {
-            @SuppressWarnings("rawtypes")
-            Map mapVal = (Map) val;
-            for (Object keyObj : mapVal.keySet()) {
-                Property subVal = (Property) mapVal.get(keyObj);
-                if (containsSignificantData (subVal)) {
-                    return true;
-                }
-            }
-        }
-        else if (arity.equals (PropertyArity.SET) && pType.equals (PropertyType.PROPERTY)) {
-            @SuppressWarnings("rawtypes")
-            Set setVal = (Set) val;
-            for (Object subObj : setVal) {
-                if (containsSignificantData((Property) subObj)) {
-                    return true;
-                }
-            }
-        }
-        else if (arity.equals (PropertyArity.LIST) && pType.equals (PropertyType.PROPERTY)) {
-            @SuppressWarnings("rawtypes")
-            List listVal = (List) val;
-            for (Object subObj : listVal) {
-                if (containsSignificantData((Property) subObj)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+    public void processFile (String filePath, 
+            Module module,
+            OutputHandler handler) throws Exception {
+        jb.process (app, module,  handler,  filePath);
     }
 }
