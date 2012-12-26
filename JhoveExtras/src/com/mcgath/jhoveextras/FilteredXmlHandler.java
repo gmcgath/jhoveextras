@@ -100,16 +100,11 @@ permission of its copyright owner.
 
 package com.mcgath.jhoveextras;
 
-import java.util.Collection;
-import java.util.HashMap;
+//import java.util.Collection;
+//import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import edu.harvard.hul.ois.jhove.Property;
-import edu.harvard.hul.ois.jhove.PropertyArity;
-import edu.harvard.hul.ois.jhove.PropertyType;
 import edu.harvard.hul.ois.jhove.RepInfo;
 import edu.harvard.hul.ois.jhove.handler.XmlHandler;
 
@@ -117,20 +112,17 @@ public class FilteredXmlHandler extends XmlHandler {
 
     private final static String NAME = "Filtered XML Handler";
     private final static String RIGHTS = "Copyright 2012 Gary McGath";
+    private static final String RELEASE = "1.0";
+    private static final int [] DATE = {2012, 12, 26};
+    private static final String NOTE = "This class extends JHOVE's XmlHandler.";
     
     private Set<String> significantPropNames;
-//    private final static String[] significantPropArray = {
-//        "foo", "bar" };
+
     
     /** Constructor */
     public FilteredXmlHandler () {
-        super ();
-        _name = NAME;
-        _rights = RIGHTS;
+        super (NAME, RELEASE, DATE, NOTE, RIGHTS);
         significantPropNames = new HashSet<String>();
-//        for (String s : significantPropArray) {
-//            significantPropNames.add (s);
-//        }
     }
     
     /** Add the name of a property to be retained */
@@ -148,78 +140,15 @@ public class FilteredXmlHandler extends XmlHandler {
      */
     @Override
     public void analyze (RepInfo info) {
-        Map<String, Property> props = info.getProperty();
-        for (String key : props.keySet()) {
-            Property p = props.get(key);
-            if (!testForRetention(p)) {
-                props.remove(key);
-            }
-        }
+        PropertyPruner pp = new PropertyPruner (info);
+        pp.prune (significantPropNames);
+//        Map<String, Property> props = info.getProperty();
+//        for (String key : props.keySet()) {
+//            Property p = props.get(key);
+//            if (!testForRetention(p, significantPropNames)) {
+//                props.remove(key);
+//            }
+//        }
     }
     
-    /* Return true if this property contains either has a name
-     * which is one of the significant property names, or has
-     * a descendant that does. */
-    private boolean testForRetention (Property p ) {
-        if (significantPropNames.contains( p.getName())) {  
-            return true;      
-        }
-        Object val = p.getValue();
-        PropertyArity arity = p.getArity();
-        PropertyType pType = p.getType();
-        if (arity.equals (PropertyArity.MAP) && pType.equals (PropertyType.PROPERTY)) {
-            @SuppressWarnings("rawtypes")
-            Map mapVal = (Map) val;
-            boolean retain = false;
-            // I'm not sure it's necessary to do it this way, but it seems safer,
-            // since we're removing stuff inside the loop.
-            Object[] keys = mapVal.keySet().toArray();
-            for (int i = 0; i < keys.length; i++) {
-                Object keyObj = keys[i];
-                Property subVal = (Property) mapVal.get(keyObj);
-                if (testForRetention (subVal)) {
-                    retain = true;
-                }
-                else {
-                    mapVal.remove(keyObj);
-                }
-            }
-            return retain;
-        }
-        else if (arity.equals (PropertyArity.SET) && pType.equals (PropertyType.PROPERTY)) {
-            @SuppressWarnings("rawtypes")
-            Set setVal = (Set) val;
-            boolean retain = false;
-            // Same thing here -- can we safely iterate through a set
-            // while removing things from it?
-            Object[] objects = setVal.toArray();
-            for (int i = 0; i < objects.length; i++) {
-                Object subObj = objects[i];
-                if (testForRetention((Property) subObj)) {
-                    retain = true;
-                }
-                else {
-                    setVal.remove(subObj);
-                }
-            }
-            return retain;
-        }
-        else if (arity.equals (PropertyArity.LIST) && pType.equals (PropertyType.PROPERTY)) {
-            @SuppressWarnings("rawtypes")
-            List listVal = (List) val;
-            boolean retain = false;
-            Object[] objects = listVal.toArray();
-            for (int i = 0; i < objects.length; i++) {
-                Object subObj = objects[i];
-                if (testForRetention((Property) subObj)) {
-                    retain = true;
-                }
-                else {
-                    listVal.remove (subObj); // this isn't safe, is it?
-                }
-            }
-            return retain;
-        }
-        return false;
-    }
 }
