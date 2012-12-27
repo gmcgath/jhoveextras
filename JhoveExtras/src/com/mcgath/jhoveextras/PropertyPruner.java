@@ -89,11 +89,37 @@ public class PropertyPruner {
                     retain = true;
                 }
                 else {
-                    listVal.remove (subObj); // this isn't safe, is it?
+                    listVal.remove (subObj); 
                 }
             }
             return retain;
         }
+        else if (arity.equals (PropertyArity.ARRAY) && pType.equals (PropertyType.PROPERTY)) {
+            // This is annoying. You can't remove items from an array without
+            // replacing them with something else, and replacing them with nulls
+            // is a bad idea. You can't replace the entire value of a Property
+            // with a new object. 
+            // The best of the bad choices is to "delete" properties by
+            // replacing them with a stub property.
+            @SuppressWarnings("rawtypes")
+            Property [] objects = (Property[]) val;
+            int nKept = 0;
+            boolean retain = false;
+            for (int i = 0; i < objects.length; i++) {
+                Object subObj = objects[i];
+                if (testForRetention((Property) subObj, propNames)) {
+                    retain = true;
+                    ++nKept;
+                }
+                else {
+                    // "delete" the property
+                    objects[i] = new Property("Redacted", PropertyType.INTEGER, (Integer) 0);
+                }
+            }
+            
+            return retain;
+        }
+
         return false;
     }
 
