@@ -1,0 +1,14 @@
+int ch = readUnsignedByte (_dstream, this);
+
+/* Only byte values 0x00 through 0x7f are valid. */
+
+if (ch > 0x7f) {
+  ErrorMessage error =
+    new ErrorMessage ("Invalid character",
+      "Character = " + ((char) ch) +
+      " (0x" + Integer.toHexString (ch) +
+      ")", _nByte - 1);
+  info.setMessage (error);
+  info.setWellFormed (RepInfo.FALSE);
+  return 0;
+}

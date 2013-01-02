@@ -1,0 +1,7 @@
+PrintWriter writer = ...;
+handler.setWriter (writer);
+handler.setBase (jb);
+Module module = ...;
+module.init("");
+module.setDefaultParams(new ArrayList<String>());
+jb.process (app, module, handler, dirFileOrUri);

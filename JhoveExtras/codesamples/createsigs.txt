@@ -1,0 +1,27 @@
+Signature sig = new ExternalSignature ("AIFF", SignatureType.FILETYPE,
+     SignatureUseType.OPTIONAL);
+_signature.add (sig);
+sig = new ExternalSignature ("AIFC", SignatureType.FILETYPE,
+     SignatureUseType.OPTIONAL);
+_signature.add (sig);
+sig = new ExternalSignature (".aif", SignatureType.EXTENSION,
+     SignatureUseType.OPTIONAL);
+_signature.add (sig);
+sig = new ExternalSignature (".aifc", SignatureType.EXTENSION,
+SignatureUseType.OPTIONAL,
+     "For AIFF-C profile");
+_signature.add (sig);
+
+sig = new InternalSignature ("FORM", SignatureType.MAGIC, 
+     SignatureUseType.MANDATORY, 0);
+_signature.add (sig);
+
+sig = new InternalSignature ("AIFF", SignatureType.MAGIC,
+     SignatureUseType.OPTIONAL, 8,
+     "For AIFF profile");
+_signature.add (sig);
+
+sig = new InternalSignature ("AIFC", SignatureType.MAGIC,
+     SignatureUseType.OPTIONAL, 0,
+     "For AIFF-C profile");
+_signature.add (sig);
