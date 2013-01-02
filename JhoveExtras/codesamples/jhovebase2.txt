@@ -1,0 +1,6 @@
+    jb.setEncoding ("UTF-8");
+    jb.setTempDirectory ("/user/me/temp1");
+    jb.setBufferSize (131072);
+    jb.setChecksumFlag (false);
+    jb.setShowRawFlag (false);
+    jb.setSignatureFlag (false);

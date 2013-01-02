@@ -1,0 +1,6 @@
+ <module>
+  <class>edu.harvard.hul.ois.jhove.module.XmlModule</class>
+  <param>
+    schema=http://www.example.com/schema;
+    /home/schemas/exampleschema.xsd</param>
+ </module>

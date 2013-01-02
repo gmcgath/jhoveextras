@@ -1,0 +1,2 @@
+    JhoveBase jb = new JhoveBase ();
+    jb.init (configFilePath, null);

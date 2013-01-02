@@ -1,0 +1,4 @@
+<module>
+  <class>edu.harvard.hul.ois.jhove.module.TiffModule</class>
+  <param>byteoffset=true</param>
+</module>

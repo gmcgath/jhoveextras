@@ -1,0 +1,6 @@
+  String appName = "My JHOVE wrapper";
+  String version = "1.0";
+  int[] date = { 2002, 12, 31};    // year, month, day
+  String usage = "One-line explanation of how to use it";
+  String rights = "Copyright 2012 by me";
+  App app = new App (appName, version, date, usage, rights);
